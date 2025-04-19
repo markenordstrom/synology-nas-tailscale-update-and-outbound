@@ -1,0 +1,16 @@
+# Run Tailscale update and capture output
+update_output=$(tailscale update --yes)
+
+# Check output for no update needed message
+echo "$update_output" | grep -q "already running stable version"
+
+# If the above grep command finds the string, it returns 0 (true), indicating no update was needed
+
+if [ $? -eq 0 ]; then
+    echo "No update needed; not running outbound script."
+else
+    echo "Update applied, running outbound script."
+    # Run outbound script
+    /var/packages/Tailscale/target/bin/tailscale configure-host
+    synosystemctl restart pkgctl-Tailscale.service
+fi
